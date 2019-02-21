@@ -9,6 +9,12 @@ module Rack
 
     def call(env)
       request = Rack::Request.new(env)
+
+      puts "############ Host: #{request.host} ############"
+      puts @hosts
+      puts @hosts.include?(request.host)
+      puts "###############################################"
+
       if @hosts.include?(request.host)
         @app.call(env)
       else
