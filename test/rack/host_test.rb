@@ -8,7 +8,7 @@ class Rack::HostTest < Minitest::Test
   end
 
   def app
-    @app ||= Rack::Host.new(backend, hosts: ['example.com'])
+    @app ||= Rack::Host.new(backend, hosts: %w(example.com 10.0.0.0/16))
   end
 
   def test_that_it_has_a_version_number
@@ -20,8 +20,19 @@ class Rack::HostTest < Minitest::Test
     assert last_response.ok?
   end
 
+  def test_passes_on_requests_when_host_list_contains_cidr
+    get "http://10.0.1.255/page"
+    assert last_response.ok?
+  end
+
   def test_404s_requests_to_other_hosts
     get "http://other.com/page"
+    assert_equal 404, last_response.status
+    assert_equal 'Not Found', last_response.body
+  end
+
+  def test_404s_requests_from_invalid_host_ip
+    get "http://172.1.1.101/page"
     assert_equal 404, last_response.status
     assert_equal 'Not Found', last_response.body
   end
