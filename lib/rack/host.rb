@@ -32,7 +32,7 @@ module Rack
     end
 
     def ip_matches_host_list_ips?(hosts, host)
-      host = IPAddr.new(host)
+      host  = IPAddr.new(host)
       hosts =
         hosts.select { |s| is_ip?(s)}
              .map { |ip| IPAddr.new(ip) }
@@ -41,7 +41,7 @@ module Rack
     end
 
     def ip_regex
-      /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))?$/
+      %r{^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))?$}
     end
 
     def is_ip?(str)
