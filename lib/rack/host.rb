@@ -38,8 +38,8 @@ module Rack
              .map { |ip| IPAddr.new(ip) }
 
       hosts.any? { |ip| ip.include? host }
-      rescue
-        false
+    rescue IPAddr::AddressFamilyError, IPAddr::InvalidAddressError
+      false
     end
 
     def ip_regex

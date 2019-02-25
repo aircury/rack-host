@@ -4,7 +4,7 @@ class Rack::HostTest < Minitest::Test
   include Rack::Test::Methods
 
   def backend
-    lambda { |env| [200, {'Content-Type' => 'text/html'}, ['OK']] }
+    lambda { |env| [200, { 'Content-Type' => 'text/html' }, ['OK']] }
   end
 
   def app
@@ -38,7 +38,11 @@ class Rack::HostTest < Minitest::Test
   end
 
   def test_404s_when_host_ip_parse_fails
-    IPAddr.stub(:new, -> { raise InvalidAddressError, 'bad ip' }) do
+    mock = lambda { |_str|
+      raise IPAddr::InvalidAddressError, 'invalid address'
+    }
+
+    IPAddr.stub(:new, mock) do
       get 'http://10.0.1.255/page'
       assert_equal 404, last_response.status
     end
