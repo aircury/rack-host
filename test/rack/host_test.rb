@@ -36,4 +36,11 @@ class Rack::HostTest < Minitest::Test
     assert_equal 404, last_response.status
     assert_equal 'Not Found', last_response.body
   end
+
+  def test_404s_when_host_ip_parse_fails
+    IPAddr.stub(:new, -> { raise InvalidAddressError, 'bad ip' }) do
+      get 'http://10.0.1.255/page'
+      assert_equal 404, last_response.status
+    end
+  end
 end
