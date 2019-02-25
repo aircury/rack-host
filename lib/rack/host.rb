@@ -3,7 +3,7 @@ require 'rack/host/version'
 
 module Rack
   class Host
-    def initialize(app, options={})
+    def initialize(app, options = {})
       @app = app
       @hosts = options[:hosts]
     end
@@ -11,19 +11,12 @@ module Rack
     def call(env)
       request = Rack::Request.new(env)
 
-      if is_ip?(request.host)
-        if any_ips?(@hosts)
-          host     = IPAddr.new(request.host)
-          ip_hosts =
-            @hosts
-              .select {|s| is_ip?(s)}
-              .map { |ip| IPAddr.new(ip) }
-
-          if ip_hosts.any? { |ip| ip === host }
-            @app.call(env)
-          else
-            not_found
-          end
+      if is_ip?(request.host) && any_ips?(@hosts)
+        # If the request host is an IP and there were _any_ hostnames
+        # in the options that look like IPs/CIDRs then try to compare
+        # them.
+        if ip_matches_host_list_ips?(@hosts, request.host)
+          @app.call(env)
         else
           not_found
         end
@@ -35,7 +28,16 @@ module Rack
     end
 
     def any_ips?(hosts)
-      hosts.any? {|s| is_ip?(s)}
+      hosts.any? { |s| is_ip?(s) }
+    end
+
+    def ip_matches_host_list_ips?(hosts, host)
+      host = IPAddr.new(host)
+      hosts =
+        hosts.select { |s| is_ip?(s)}
+             .map { |ip| IPAddr.new(ip) }
+
+      hosts.any? { |ip| ip.include? host }
     end
 
     def ip_regex
@@ -48,7 +50,7 @@ module Rack
 
     def not_found
       content = 'Not Found'
-      [404, {'Content-Type' => 'text/html'}, [content]]
+      [404, { 'Content-Type' => 'text/html' }, [content]]
     end
   end
 end
